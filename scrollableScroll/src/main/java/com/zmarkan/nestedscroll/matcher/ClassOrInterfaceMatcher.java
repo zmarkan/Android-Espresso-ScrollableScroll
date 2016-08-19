@@ -23,6 +23,7 @@ public class ClassOrInterfaceMatcher {
 
             @Override
             public boolean matchesSafely(View view) {
+                //noinspection unchecked
                 return clazz.isAssignableFrom(view.getClass());
             }
         };
