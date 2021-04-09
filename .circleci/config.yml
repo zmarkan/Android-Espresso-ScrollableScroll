@@ -1,0 +1,24 @@
+version: 2.1
+
+orbs:
+  android: circleci/android@1.0.3
+
+jobs:
+  build-library:
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
+    steps:
+      - checkout
+      - run:
+          name: Assemble library
+          command: ./gradlew scrollableScroll:assemble
+
+workflows:
+  build-test-deploy:
+    jobs:
+      - build-library
+      - android/run-ui-tests:
+          name: Run UI tests on sample app
+          system-image: system-images;android-23;google_apis;x86
+          test-command: ./gradlew sample:connectedDebugAndroidTest
