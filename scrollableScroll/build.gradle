@@ -1,18 +1,28 @@
-apply plugin: 'com.android.library'
+plugins {
+    id "com.android.library"
+    id "maven-publish"
+    id "signing"
+}
 
-apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.zmarkan'
+group = "com.zmarkan"
+version = findProperty('LIBRARY_VERSION') ? findProperty('LIBRARY_VERSION')  : "1.0.13-snapshot" //Hardcoding snapshot version if none exist in environment variable
+def artifactId = 'android-test-scrollable-scroll'
+def ossrhUsername = findProperty('OSSRH_USERNAME')
+def ossrhPassword = findProperty('OSSRH_PASSWORD')
+def signingKey = findProperty('SIGNING_KEY')
+def signingKeyPwd = findProperty('SIGNING_KEY_PWD')
+
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 30
+    buildToolsVersion "24.0.3"
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 24
+        targetSdkVersion 30
         versionCode 1
-        versionName "1.0"
+        versionName version
 
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
 
@@ -30,6 +40,109 @@ dependencies {
     api('androidx.test.espresso:espresso-core:3.1.0', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    api 'androidx.appcompat:appcompat:1.0.0'
+    api 'androidx.appcompat:appcompat:1.2.0'
     testImplementation 'junit:junit:4.13.2'
 }
+
+
+println("Version")
+println(version)
+println("Signing key")
+println(signingKey)
+
+
+task javadoc(type: Javadoc) {
+
+    doFirst {
+        configurations.implementation
+                .filter { it.name.endsWith('.aar') }
+                .each { aar ->
+                    copy {
+                        from zipTree(aar)
+                        include "**/classes.jar"
+                        into "$buildDir/tmp/aarsToJars/${aar.name.replace('.aar', '')}/"
+                    }
+                }
+    }
+
+    configurations.implementation.setCanBeResolved(true)
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.implementation
+    classpath += fileTree(dir: "$buildDir/tmp/aarsToJars/")
+    destinationDir = file("${project.buildDir}/outputs/javadoc/")
+    failOnError false
+    exclude '**/BuildConfig.java'
+    exclude '**/R.java'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier.set('javadoc')
+    from javadoc
+}
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                // You can then customize attributes of the publication as shown below.
+                groupId = group
+                artifactId = artifactId
+                version = version
+
+                 artifact androidSourcesJar
+                 artifact javadocJar
+
+                pom {
+                    name = artifactId
+                    description = 'Android Testing Scrollable Scrollview utility for Espresso'
+                    url = 'https://github.com/zmarkan/Android-Espresso-ScrollableScroll'
+                    licenses {
+                        license {
+                            name = 'Android Espresso ScrollableScroll License'
+                            url = 'https://github.com/zmarkan/Android-Espresso-ScrollableScroll/blob/main/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'zmarkan'
+                            name = 'Zan Markan'
+                            email = 'zan@markan.me'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:github.com/zmarkan/Android-Espresso-ScrollableScroll.git'
+                        developerConnection = 'scm:git:ssh://github.com/zmarkan/Android-Espresso-ScrollableScroll.git'
+                        url = 'https://github.com/zmarkan/Android-Espresso-ScrollableScroll/tree/main'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                name = "sonatype"
+
+                def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+                credentials {
+                    username ossrhUsername
+                    password ossrhPassword
+                }
+            }
+        }
+    }
+}
+
+signing {
+    useInMemoryPgpKeys(signingKey, signingKeyPwd)
+    sign publishing.publications
+}
+
