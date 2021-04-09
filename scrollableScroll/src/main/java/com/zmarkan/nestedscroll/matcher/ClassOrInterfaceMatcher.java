@@ -6,7 +6,8 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
-import static android.support.test.espresso.core.deps.guava.base.Preconditions.checkNotNull;
+import static androidx.test.internal.util.Checks.checkNotNull;
+
 
 public class ClassOrInterfaceMatcher {
     /**

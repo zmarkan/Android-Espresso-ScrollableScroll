@@ -1,8 +1,8 @@
 package com.zmarkan.nestedscroll;
 
-import android.support.test.espresso.ViewAction;
+import androidx.test.espresso.ViewAction;
 import com.zmarkan.nestedscroll.action.ScrollableScrollToAction;
-import static android.support.test.espresso.action.ViewActions.actionWithAssertions;
+import static androidx.test.espresso.action.ViewActions.actionWithAssertions;
 
 public class ScrollableUtils {
 
