@@ -39,8 +39,8 @@ dependencies {
 }
 
 
-group = "com.zmarkan"
-version = findProperty('LIBRARY_VERSION')
+//group = "com.zmarkan"
+//version = findProperty('LIBRARY_VERSION')
 //version = System.getenv()['LIBRARY_VERSION']
 def artifactId = 'android-test-scrollable-scroll'
 //def ossrhUsername = System.getenv()['OSSRH_USERNAME']
@@ -133,8 +133,8 @@ afterEvaluate {
             maven {
                 name = "sonatype"
 
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                def releasesRepoUrl = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
                 url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
 
                 credentials {
