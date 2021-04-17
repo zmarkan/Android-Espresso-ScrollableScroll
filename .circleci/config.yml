@@ -53,7 +53,7 @@ workflows:
           version: $CIRCLE_TAG
           filters:
             tags:
-              only: /^v.*/
+              only: /^[0-9]+.*/
             branches:
               ignore: /.*/
 
