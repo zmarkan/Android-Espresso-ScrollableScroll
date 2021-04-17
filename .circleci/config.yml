@@ -43,7 +43,10 @@ workflows:
 #          filters:
 #            tags:
 #              only: /^[0-9]+.*/
-      - build-library
+      - build-library:
+          filters:
+            tags:
+              only: /^[0-9]+.*/
       - hold-for-approval:
           type: approval
           requires:
