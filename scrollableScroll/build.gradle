@@ -45,11 +45,8 @@ dependencies {
 }
 
 
-println("Version")
+println("Version to use")
 println(version)
-println("Signing key")
-println(signingKey)
-
 
 task javadoc(type: Javadoc) {
 

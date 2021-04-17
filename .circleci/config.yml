@@ -85,20 +85,4 @@ workflows:
           requires:
             - build-and-test
 
-  push-tags-only-test:
-    jobs:
-      - deploy-to-sonatype:
-          name: Deploy to Maven Central
-          filters:
-            tags:
-              only: /^[0-9]+.*/
-            branches:
-              ignore: /.*/
-
-
-  push-snapshots-only-test:
-    jobs:
-      - deploy-to-sonatype:
-          name: Deploy to Maven Central
-
 
