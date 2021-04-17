@@ -56,7 +56,7 @@ workflows:
           version: $CIRCLE_TAG
           filters:
             tags:
-              only: /^[0-9]+.*/s
+              only: /^[0-9]+.*/
 
 
 
