@@ -14,11 +14,64 @@ jobs:
           name: Assemble library
           command: ./gradlew scrollableScroll:assemble
 
+  deploy-to-sonatype:
+    parameters:
+      version:
+        type: string
+        default: 1.0.13-SNAPSHOT
+    executor:
+      name: android/android-machine
+      resource-class: xlarge
+    environment:
+      ORG_GRADLE_PROJECT_LIBRARY_VERSION: << parameters.version >>
+    steps:
+      - checkout
+      - run:
+          name: Publish to Maven
+          command: ./gradlew assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
+
 workflows:
   build-test-deploy:
     jobs:
-      - build-library
       - android/run-ui-tests:
-          name: Run UI tests on sample app
+          name: build-and-test
           system-image: system-images;android-23;google_apis;x86
-          test-command: ./gradlew sample:connectedDebugAndroidTest
+          test-command: ./gradlew assemble sample:connectedDebugAndroidTest
+      - hold-for-approval:
+          type: approval
+          requires:
+            - build-and-test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - deploy-to-sonatype:
+          name: Deploy to Maven Central
+          requires:
+            - hold-for-approval
+          version: $CIRCLE_TAG
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+  nightly-snapshot:
+    triggers: #use the triggers key to indicate a scheduled build
+      - schedule:
+          cron: "0 0 * * *" # use cron syntax to set the schedule
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      - android/run-ui-tests:
+            name: build-and-test
+            system-image: system-images;android-23;google_apis;x86
+            test-command: ./gradlew assemblesample:connectedDebugAndroidTest
+      - deploy-to-sonatype:
+          name: Deploy Snapshot to Sonatype
+          version: 1.0.13-SNAPSHOT
+          requires:
+            - build-and-test
