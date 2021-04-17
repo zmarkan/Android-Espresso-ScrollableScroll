@@ -15,20 +15,21 @@ jobs:
           command: ./gradlew clean
 
   deploy-to-sonatype:
-    parameters:
-      version:
-        type: string
-        default: 1.0.13-SNAPSHOT
     executor:
       name: android/android-machine
       resource-class: xlarge
     steps:
       - checkout
       - run:
-            name: Define ORG_GRADLE_PROJECT_LIBRARY_VERSION Environment Variable at Runtime
-            command: |
-              echo 'export ORG_GRADLE_PROJECT_LIBRARY_VERSION=$CIRCLE_TAG' >> $BASH_ENV
-              source $BASH_ENV
+          name: Define ORG_GRADLE_PROJECT_LIBRARY_VERSION Environment Variable at Runtime
+          command: |
+            if [ $CIRCLE_TAG ]
+              then
+                echo 'export ORG_GRADLE_PROJECT_LIBRARY_VERSION=$CIRCLE_TAG' >> $BASH_ENV
+              else
+                echo "export ORG_GRADLE_PROJECT_LIBRARY_VERSION=`git tag | tail -1`-SNAPSHOT" >> $BASH_ENV
+            fi
+            source $BASH_ENV
       - run:
           name: Publish to Maven
           command: ./gradlew assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
@@ -36,21 +37,17 @@ jobs:
 workflows:
   build-test-deploy:
     jobs:
-#      - android/run-ui-tests:
-#          name: build-and-test
-#          system-image: system-images;android-23;google_apis;x86
-#          test-command: ./gradlew assemble sample:connectedDebugAndroidTest
-#          filters:
-#            tags:
-#              only: /^[0-9]+.*/
-      - build-library:
+      - android/run-ui-tests:
+          name: build-and-test
+          system-image: system-images;android-23;google_apis;x86
+          test-command: ./gradlew assemble sample:connectedDebugAndroidTest
           filters:
             tags:
               only: /^[0-9]+.*/
       - hold-for-approval:
           type: approval
           requires:
-            - build-library
+            - build-and-test
           filters:
             tags:
               only: /^[0-9]+.*/
@@ -60,7 +57,6 @@ workflows:
           name: Deploy to Maven Central
           requires:
             - hold-for-approval
-          version: $CIRCLE_TAG
           filters:
             tags:
               only: /^[0-9]+.*/
@@ -74,14 +70,26 @@ workflows:
               only:
                 - main
     jobs:
-#      - android/run-ui-tests:
-#            name: build-and-test
-#            system-image: system-images;android-23;google_apis;x86
-#            test-command: ./gradlew assemblesample:connectedDebugAndroidTest
-      - build-library
+      - android/run-ui-tests:
+          name: build-and-test
+          system-image: system-images;android-23;google_apis;x86
+          test-command: ./gradlew assemblesample:connectedDebugAndroidTest
       - deploy-to-sonatype:
           name: Deploy Snapshot to Sonatype
-          version: 1.0.13-SNAPSHOT
           requires:
-#            - build-and-test
-            - build-library
+            - build-and-test
+
+  push-tags-only-test:
+    jobs:
+      - deploy-to-sonatype:
+          name: Deploy to Maven Central
+          filters:
+            tags:
+              only: /^[0-9]+.*/
+
+  push-snapshots-only-test:
+    jobs:
+      - deploy-to-sonatype:
+          name: Deploy to Maven Central
+
+
