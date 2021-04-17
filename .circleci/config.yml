@@ -37,6 +37,9 @@ workflows:
           name: build-and-test
           system-image: system-images;android-23;google_apis;x86
           test-command: ./gradlew assemble sample:connectedDebugAndroidTest
+          filters:
+            tags:
+              only: /^[0-9]+.*/
       - hold-for-approval:
           type: approval
           requires:
@@ -51,6 +54,10 @@ workflows:
           requires:
             - hold-for-approval
           version: $CIRCLE_TAG
+          filters:
+            tags:
+              only: /^[0-9]+.*/s
+
 
 
   nightly-snapshot:
