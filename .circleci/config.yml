@@ -43,7 +43,7 @@ workflows:
             - build-and-test
           filters:
             tags:
-              only: /^v.*/
+              only: /^[0-9]+.*/
             branches:
               ignore: /.*/
       - deploy-to-sonatype:
@@ -51,11 +51,7 @@ workflows:
           requires:
             - hold-for-approval
           version: $CIRCLE_TAG
-          filters:
-            tags:
-              only: /^[0-9]+.*/
-            branches:
-              ignore: /.*/
+
 
   nightly-snapshot:
     triggers: #use the triggers key to indicate a scheduled build
