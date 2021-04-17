@@ -31,6 +31,12 @@ jobs:
             fi
             source $BASH_ENV
       - run:
+          name: Inject Maven signing key
+          command: |
+            echo $GPG_SIGNING_KEY \
+              | awk 'NR == 1 { print "SIGNING_KEY=" } 1' ORS='\\n' \
+              >> gradle.properties
+      - run:
           name: Publish to Maven
           command: ./gradlew assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
 
