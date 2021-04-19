@@ -29,6 +29,9 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+group = "com.zmarkan"
+version = findProperty('LIBRARY_VERSION') ? findProperty('LIBRARY_VERSION')  : "1.0.13-snapshot" //Hardcoding snapshot version if none exist in environment variable
+
 
 nexusPublishing {
     repositories {
