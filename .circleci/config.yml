@@ -84,5 +84,3 @@ workflows:
           name: Deploy Snapshot to Sonatype
           requires:
             - build-and-test
-
-
