@@ -40,6 +40,11 @@ jobs:
           name: Publish to Maven
           command: ./gradlew assemble publishToSonatype closeAndReleaseSonatypeStagingRepository
 
+parameters:
+  run-schedule:
+    type: boolean
+    default: false
+
 workflows:
   build-test-deploy:
     jobs:
@@ -68,13 +73,14 @@ workflows:
               only: /^[0-9]+.*/
 
   nightly-snapshot:
-    triggers: #use the triggers key to indicate a scheduled build
-      - schedule:
-          cron: "0 0 * * *" # use cron syntax to set the schedule
-          filters:
-            branches:
-              only:
-                - main
+#    triggers: #use the triggers key to indicate a scheduled build
+#      - schedule:
+#          cron: "0 0 * * *" # use cron syntax to set the schedule
+#          filters:
+#            branches:
+#              only:
+#                - main
+    when: << pipeline.parameters.run-schedule >>
     jobs:
       - android/run-ui-tests:
           name: build-and-test
