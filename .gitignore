@@ -9,3 +9,5 @@
 /captures
 .externalNativeBuild
 notes
+**/node_modules/**
+.env
