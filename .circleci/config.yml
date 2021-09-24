@@ -47,6 +47,8 @@ parameters:
 
 workflows:
   build-test-deploy:
+    when:
+      not: << pipeline.parameters.run-schedule >>
     jobs:
       - android/run-ui-tests:
           name: build-and-test
@@ -73,13 +75,6 @@ workflows:
               only: /^[0-9]+.*/
 
   nightly-snapshot:
-#    triggers: #use the triggers key to indicate a scheduled build
-#      - schedule:
-#          cron: "0 0 * * *" # use cron syntax to set the schedule
-#          filters:
-#            branches:
-#              only:
-#                - main
     when: << pipeline.parameters.run-schedule >>
     jobs:
       - android/run-ui-tests:
