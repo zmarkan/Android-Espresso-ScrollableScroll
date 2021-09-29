@@ -1,24 +1,3 @@
-
-/*
-curl --location --request POST 'https://circleci.com/api/v2/project/<vcs-type>/<organization-name-or-id>/<project-name-or-id>/schedule' \
---header 'circle-token: <your-cci-token>' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "name": "trigger name",
-    "description": "some description",
-    "attribution-actor": "system",
-    "parameters": {
-      "branch": "master",
-      "run-schedule": true
-    },
-    "timetable": {
-        "per_hour": 3,
-        "hours_of_day": [1,5],
-        "days_of_week": ["MON", "WED"]
-    }
-}'
-*/
-
 const axios = require('axios').default;
 require('dotenv').config()
 
